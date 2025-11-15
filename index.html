@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV — Amina Murtazova</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* 🌠 Глобальные стили */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Плавный скролл — КЛЮЧЕВОЙ ЭФФЕКТ */
+        html {
+            scroll-behavior: smooth;
+            /* Для поддержки на Safari — fallback через JS ниже */
+        }
+
+        body {
+            font-family: 'Sora', sans-serif;
+            background: #ffffff;
+            color: #fff;
+            min-height: 200vh; /* чтобы был скролл */
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* ——— Фон с частицами ——— */
+        #particles-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* ——— 3D Имя ——— */
+        #scene-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* ——— Контент ниже 3D-блока ——— */
+        .content {
+            position: relative;
+            z-index: 10;
+            padding: 120px 20px 60px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* ——— Стикер-панель ——— */
+        .sticker-panel {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 200;
+        }
+
+        .sticker-btn {
+            width: 50px;
+            height: 50px;
+            background: #0000ff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+            user-select: none;
+        }
+
+        .sticker-btn:hover {
+            transform: scale(1.15);
+        }
+
+        /* ——— Карточки ——— */
+        .card {
+            background: #0000ff;
+            color: #ffffff;
+            border-radius: 20px;
+            padding: 28px;
+            width: 100%;
+            max-width: 550px;
+            margin: 0 auto 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            cursor: grab;
+            position: relative;
+            z-index: 10;
+            user-select: none;
+            font-size: 1.02rem;
+            line-height: 1.6;
+        }
+
+        .card:active {
+            cursor: grabbing;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2), 0 0 0 3px rgba(255,255,255,0.2) inset;
+        }
+
+        .card-header {
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .card-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+
+        /* ——— Стикер (эмодзи) ——— */
+        .sticker {
+            position: absolute;
+            font-size: 40px;
+            user-select: none;
+            cursor: grab;
+            z-index: 50;
+            pointer-events: auto;
+            text-shadow: 
+                0 0 8px rgba(0, 60, 200, 0.3),
+                0 0 16px rgba(100, 180, 255, 0.2);
+        }
+
+        .sticker:active {
+            cursor: grabbing;
+            transform: scale(1.4);
+            z-index: 200;
+            text-shadow: 
+                0 0 12px rgba(0, 80, 255, 0.6),
+                0 0 24px rgba(130, 200, 255, 0.4);
+        }
+
+        /* ——— Контактная панель ——— */
+        .contact-bar {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,255,0.08);
+            padding: 12px 24px;
+            border-radius: 50px;
+            color: #0000ff;
+            font-weight: 600;
+            z-index: 100;
+            border: 2px solid #0000ff;
+        }
+
+        /* ——— Секции для скролла ——— */
+        section {
+            padding: 80px 0;
+            scroll-margin-top: 80px; /* для anchor-ссылок */
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #0000ff;
+        }
+
+        p {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: #333;
+            max-width: 700px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        /* Кнопки навигации (опционально) */
+        .nav-dots {
+            position: fixed;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 150;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(0,0,255,0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .dot.active, .dot:hover {
+            background: #0000ff;
+            transform: scale(1.3);
+        }
+
+        @media (max-width: 768px) {
+            .sticker-panel, .nav-dots { display: none; }
+            .card { max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 🌠 Частицы -->
+    <canvas id="particles-canvas"></canvas>
+
+    <!-- 🖱️ Контактная панель -->
+    <div class="contact-bar">
+        aminamurtayovag@gmail.com • +420 602 373 234 • Praha • behance.net/aminamurtazova
+    </div>
+
+    <!-- 🌟 3D Имя -->
+    <div id="scene-container"></div>
+
+    <!-- 🎀 Панель стикеров -->
+    <div class="sticker-panel">
+        <div class="sticker-btn" data-emoji="⭐">⭐</div>
+        <div class="sticker-btn" data-emoji="❤️">❤️</div>
+        <div class="sticker-btn" data-emoji="😊">😊</div>
+        <div class="sticker-btn" data-emoji="✋">✋</div>
+        <div class="sticker-btn" data-emoji="🎀">🎀</div>
+        <div class="sticker-btn" data-emoji="💫">💫</div>
+        <div class="sticker-btn" data-emoji="🐾">🐾</div>
+    </div>
+
+    <!-- 🔘 Навигация (точки) -->
+    <div class="nav-dots" id="navDots">
+        <div class="dot" data-target="intro"></div>
+        <div class="dot" data-target="about"></div>
+        <div class="dot" data-target="skills"></div>
+        <div class="dot" data-target="projects"></div>
+    </div>
+
+    <!-- 📄 Основной контент -->
+    <div class="content">
+        <section id="intro">
+            <h1>Hello,<br><span style="color:#0000ff">Amina Murtazova</span></h1>
+            <p>Junior grafická designérka • Praha • 2025</p>
+        </section>
+
+        <section id="about">
+            <div class="card">
+                <div class="card-header"><h2 class="card-title">O mně</h2></div>
+                <p>
+                    Jsem junior grafická designérka s praktickými zkušenostmi z reklamních agentur a kreativních studií. 
+                    Specializuji se na grafický design, ilustrace a vizuální komunikaci. 
+                    Pracuji na vlastním autorském projektu — knize s AR (rozšířenou realitou).
+                </p>
+            </div>
+        </section>
+
+        <section id="skills">
+            <div class="card">
+                <div class="card-header"><h2 class="card-title">Dovednosti</h2></div>
+                <p><strong>Adobe Suite:</strong> Illustrator, Photoshop, After Effects<br>
+                   <strong>AR & Interaktivita:</strong> Spark AR, základy Three.js<br>
+                   <strong>Jazyky:</strong> čeština a angličtina — plynule</p>
+            </div>
+        </section>
+
+        <section id="projects">
+            <div class="card">
+                <div class="card-header"><h2 class="card-title">Projekty</h2></div>
+                <p>
+                    <strong>Autorská kniha s AR</strong><br>
+                    Kniha, která „ožije“, až ji přiložíš k obrazovce. 
+                    Každá ilustrace se promění v interaktivní příběh. 
+                    Právě pracuji na finální verzi (2024–2025).
+                </p>
+            </div>
+        </section>
+    </div>
+
+    <!-- 🎯 Three.js для 3D-имени -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+
+    <script>
+        // =============== 🌠 Частицы ===============
+        (function() {
+            const canvas = document.getElementById('particles-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            const particleCount = 90;
+            const particles = [];
+            let mouseX = null, mouseY = null;
+            const mouseRadius = 100;
+
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.size = Math.random() * 2 + 0.5;
+                    this.speedX = (Math.random() - 0.5) * 0.2;
+                    this.speedY = (Math.random() - 0.5) * 0.2;
+                    this.color = `rgba(0, 0, 255, ${Math.random() * 0.3 + 0.1})`;
+                }
+
+                update() {
+                    // Отталкивание от курсора
+                    if (mouseX !== null && mouseY !== null) {
+                        const dx = this.x - mouseX;
+                        const dy = this.y - mouseY;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        if (distance < mouseRadius) {
+                            const force = (mouseRadius - distance) / mouseRadius;
+                            const angle = Math.atan2(dy, dx);
+                            this.speedX += Math.cos(angle) * force * 0.8;
+                            this.speedY += Math.sin(angle) * force * 0.8;
+                        }
+                    }
+
+                    // Замедление
+                    this.speedX *= 0.98;
+                    this.speedY *= 0.98;
+
+                    // Движение
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+
+                    // Попадание на другую сторону
+                    if (this.x < 0) this.x = canvas.width;
+                    if (this.x > canvas.width) this.x = 0;
+                    if (this.y < 0) this.y = canvas.height;
+                    if (this.y > canvas.height) this.y = 0;
+                }
+
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color;
+                    ctx.shadowColor = '#0000ff';
+                    ctx.shadowBlur = 10;
+                    ctx.fill();
+                }
+            }
+
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+
+            canvas.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+
+            canvas.addEventListener('mouseleave', () => {
+                mouseX = null;
+                mouseY = null;
+            });
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.02)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height); // лёгкий "шум"
+
+                for (let p of particles) {
+                    p.update();
+                    p.draw();
+                }
+                requestAnimationFrame(animate);
+            }
+            animate();
+        })();
+
+        // =============== 🌀 3D Имя ===============
+        (function() {
+            if (!document.getElementById('scene-container')) return;
+            
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            document.getElementById('scene-container').appendChild(renderer.domElement);
+
+            let textMesh;
+            const loader = new THREE.FontLoader();
+            loader.load('https://cdn.jsdelivr.net/npm/three@0.152.2/examples/fonts/helvetiker_bold.typeface.json', function(font) {
+                const textGeo = new THREE.TextGeometry('Amina', {
+                    font: font,
+                    size: 4,
+                    height: 0.3,
+                    curveSegments: 12,
+                    bevelEnabled: true,
+                    bevelThickness: 0.08,
+                    bevelSize: 0.04,
+                    bevelSegments: 4
+                });
+
+                textGeo.computeBoundingBox();
+                const centerOffset = -0.5 * (textGeo.boundingBox.max.x - textGeo.boundingBox.min.x);
+                textGeo.translate(centerOffset, 0, 0);
+
+                const mat = new THREE.MeshPhongMaterial({
+                    color: 0x0044ff,
+                    emissive: 0x001144,
+                    shininess: 90,
+                    transparent: true,
+                    opacity: 0.97
+                });
+
+                textMesh = new THREE.Mesh(textGeo, mat);
+                scene.add(textMesh);
+
+                const ambient = new THREE.AmbientLight(0xffffff, 0.7);
+                scene.add(ambient);
+                const dir = new THREE.DirectionalLight(0xffffff, 0.8);
+                dir.position.set(5, 10, 7);
+                scene.add(dir);
+
+                camera.position.z = 16;
+
+                function animate() {
+                    requestAnimationFrame(animate);
+                    if (textMesh) {
+                        textMesh.rotation.y += 0.002;
+                        textMesh.rotation.x = Math.sin(Date.now() * 0.0004) * 0.15;
+                    }
+                    renderer.render(scene, camera);
+                }
+                animate();
+            });
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        })();
+
+        // =============== 🖱️ Drag & Drop (универсальный) ===============
+        function makeDraggable(el) {
+            let isDragging = false, offsetX, offsetY;
+            const start = (x, y) => {
+                isDragging = true;
+                const r = el.getBoundingClientRect();
+                offsetX = x - r.left;
+                offsetY = y - r.top;
+                el.style.zIndex = '1000';
+            };
+            const move = (x, y) => {
+                if (!isDragging) return;
+                el.style.left = (x - offsetX) + 'px';
+                el.style.top = (y - offsetY) + 'px';
+            };
+            const stop = () => isDragging = false;
+
+            el.addEventListener('mousedown', e => start(e.clientX, e.clientY));
+            document.addEventListener('mousemove', e => move(e.clientX, e.clientY));
+            document.addEventListener('mouseup', stop);
+
+            el.addEventListener('touchstart', e => {
+                const t = e.touches[0];
+                start(t.clientX, t.clientY);
+                e.preventDefault();
+            });
+            document.addEventListener('touchmove', e => {
+                if (e.touches.length) {
+                    const t = e.touches[0];
+                    move(t.clientX, t.clientY);
+                    e.preventDefault();
+                }
+            });
+            document.addEventListener('touchend', stop);
+        }
+
+        document.querySelectorAll('.card').forEach(card => {
+            card.style.position = 'absolute';
+            card.style.left = (Math.random() * 60 + 20) + '%';
+            card.style.top = (40 + Math.random() * 40) + 'vh';
+            makeDraggable(card);
+        });
+
+        // Стикер-панель
+        document.querySelectorAll('.sticker-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const emoji = btn.getAttribute('data-emoji');
+                const el = document.createElement('div');
+                el.className = 'sticker';
+                el.textContent = emoji;
+                el.style.left = (window.innerWidth / 2 - 20) + 'px';
+                el.style.top = (window.innerHeight / 2) + 'px';
+                document.body.appendChild(el);
+                makeDraggable(el);
+            });
+        });
+
+        // =============== 📌 Плавный скролл + навигация ===============
+        // Fallback для Safari (где scroll-behavior: smooth не всегда работает)
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    window.scrollTo({
+                        top: target.offsetTop - 60,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Обновление активной точки при скролле
+        const dots = document.querySelectorAll('.dot');
+        const sections = ['intro', 'about', 'skills', 'projects'].map(id => document.getElementById(id));
+
+        window.addEventListener('scroll', () => {
+            const scrollY = window.scrollY + window.innerHeight / 2;
+            sections.forEach((section, i) => {
+                if (!section) return;
+                const rect = section.getBoundingClientRect();
+                const isInView = rect.top < window.innerHeight / 2 && rect.bottom > window.innerHeight / 2;
+                dots[i].classList.toggle('active', isInView);
+            });
+        });
+
+        // Клик по точкам
+        dots.forEach((dot, i) => {
+            dot.addEventListener('click', () => {
+                const id = dot.getAttribute('data-target');
+                const target = document.getElementById(id);
+                if (target) {
+                    window.scrollTo({
+                        top: target.offsetTop - 60,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
